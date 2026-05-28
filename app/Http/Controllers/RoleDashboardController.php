@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class RoleDashboardController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(): View|RedirectResponse
     {
         $user = auth()->user();
 
@@ -32,7 +33,6 @@ class RoleDashboardController extends Controller
             'Admin' => 'dashboards.admin',
             'Finance' => 'dashboards.finance',
             'Marketing' => 'dashboards.marketing',
-            'Donor' => 'dashboards.donor',
             'Auditor' => 'dashboards.auditor',
         ];
 
@@ -40,6 +40,11 @@ class RoleDashboardController extends Controller
             if ($user->hasRole($role)) {
                 return view($view);
             }
+        }
+
+        // Donors get redirected to their dedicated portal with data
+        if ($user->hasRole('Donor')) {
+            return redirect()->route('donor.portal');
         }
 
         return view('dashboard');

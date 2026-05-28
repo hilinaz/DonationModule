@@ -45,6 +45,19 @@ class RegisteredUserController extends Controller
         // Public registration is for Donors only
         $user->assignRole('Donor');
 
+        // Auto-create a linked Donor profile so they can donate immediately
+        \App\Models\Donor::firstOrCreate(
+            ['email' => $user->email],
+            [
+                'first_name'      => explode(' ', $user->name, 2)[0],
+                'last_name'       => explode(' ', $user->name, 2)[1] ?? '',
+                'donor_type'      => 'individual',
+                'category'        => 'regular',
+                'lifecycle_stage' => 'new',
+                'is_active'       => true,
+            ]
+        );
+
         event(new Registered($user));
 
         Auth::login($user);

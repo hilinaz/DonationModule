@@ -41,17 +41,29 @@
                 <nav class="flex-1 px-4 pb-4 overflow-y-auto">
                     <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-3 mb-3 mt-2">Menu</p>
 
-                    <!-- Dashboard -->
-                    <a href="{{ route('dashboard') }}"
+                    <!-- Dashboard / Portal -->
+                    <a href="{{ Auth::user()->hasRole('Donor') ? route('donor.portal') : route('dashboard') }}"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all
-                              {{ request()->routeIs('dashboard') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                              {{ request()->routeIs('dashboard') || request()->routeIs('donor.portal') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                         Dashboard
                     </a>
 
-                    <!-- Donors -->
+                    @role('Donor')
+                    <!-- Donor-only: Campaigns (read-only view via portal) -->
+                    <a href="{{ route('donor.portal') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        My Donations
+                    </a>
+                    @endrole
+
+                    @hasanyrole('Admin|Fundraising Manager|Finance|Marketing|Auditor')
+                    <!-- Staff-only nav items -->
                     <a href="{{ route('donors.index') }}"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all
                               {{ request()->routeIs('donors.*') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
@@ -60,9 +72,9 @@
                         </svg>
                         Donors
                     </a>
+                    @endhasanyrole
 
                     @hasanyrole('Fundraising Manager|Admin')
-                    <!-- Campaigns -->
                     <a href="{{ route('campaigns.index') }}"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all
                               {{ request()->routeIs('campaigns.*') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
@@ -73,8 +85,62 @@
                     </a>
                     @endhasanyrole
 
+                    @hasanyrole('Admin|Fundraising Manager|Finance')
+                    <a href="{{ route('donations.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all
+                              {{ request()->routeIs('donations.*') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Donations
+                    </a>
+                    @endhasanyrole
+
+                    @hasanyrole('Admin|Fundraising Manager')
+                    <a href="{{ route('pledges.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all
+                              {{ request()->routeIs('pledges.*') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Pledges
+                    </a>
+                    @endhasanyrole
+
+                    @hasanyrole('Admin|Finance|Auditor|Fundraising Manager')
+                    <div x-data="{ reportsOpen: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
+                        <button @click="reportsOpen = !reportsOpen"
+                                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all
+                                       {{ request()->routeIs('reports.*') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span class="flex-1 text-left">Reports</span>
+                            <svg class="h-3.5 w-3.5 transition-transform" :class="reportsOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="reportsOpen" x-transition class="ml-7 space-y-0.5 mt-0.5">
+                            <a href="{{ route('reports.donations') }}"
+                               class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all
+                                      {{ request()->routeIs('reports.donations') ? 'text-teal-400 bg-teal-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                Donation Report
+                            </a>
+                            <a href="{{ route('reports.donors') }}"
+                               class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all
+                                      {{ request()->routeIs('reports.donors') ? 'text-teal-400 bg-teal-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                Donor Analytics
+                            </a>
+                            <a href="{{ route('reports.campaigns') }}"
+                               class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all
+                                      {{ request()->routeIs('reports.campaigns') ? 'text-teal-400 bg-teal-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                Campaign Report
+                            </a>
+                        </div>
+                    </div>
+                    @endhasanyrole
+
                     @role('Admin')
-                    <!-- Staff -->
                     <a href="{{ route('staff.index') }}"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all
                               {{ request()->routeIs('staff.*') ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
