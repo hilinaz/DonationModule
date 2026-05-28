@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Services\InAppNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -10,6 +11,10 @@ use Illuminate\View\View;
 
 class CampaignController extends Controller
 {
+    public function __construct(
+        private InAppNotificationService $inAppNotificationService,
+    ) {}
+
     /**
      * Display a listing of the campaigns.
      */
@@ -54,6 +59,8 @@ class CampaignController extends Controller
 
         $campaign = Campaign::create($validated);
 
+        $this->inAppNotificationService->announceCampaign($campaign);
+
         return redirect()->route('campaigns.show', $campaign)
             ->with('status', 'Campaign created successfully.');
     }
@@ -93,7 +100,13 @@ class CampaignController extends Controller
     {
         $validated = $this->validateCampaign($request, $campaign->id);
 
+        $wasAnnounceable = $campaign->status === 'active' && $campaign->is_public;
+
         $campaign->update($validated);
+
+        if (! $wasAnnounceable) {
+            $this->inAppNotificationService->announceCampaign($campaign);
+        }
 
         return redirect()->route('campaigns.show', $campaign)
             ->with('status', 'Campaign updated successfully.');

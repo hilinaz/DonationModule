@@ -7,6 +7,7 @@ use App\Models\Donation;
 use App\Models\Donor;
 use App\Services\DonationService;
 use App\Services\DonorLifecycleService;
+use App\Services\InAppNotificationService;
 use Illuminate\Http\Request;
 
 class DonationController extends Controller
@@ -14,6 +15,7 @@ class DonationController extends Controller
     public function __construct(
         private DonationService $donationService,
         private DonorLifecycleService $lifecycleService,
+        private InAppNotificationService $inAppNotificationService,
     ) {}
 
     public function index(Request $request)
@@ -79,6 +81,10 @@ class DonationController extends Controller
         $donor = Donor::find($validated['donor_id']);
         $this->lifecycleService->refresh($donor);
 
+        if ($donation->payment_status === 'completed') {
+            $this->inAppNotificationService->sendDonationThankYou($donation);
+        }
+
         return redirect()->route('donations.show', $donation)
             ->with('status', 'Donation recorded successfully.');
     }
@@ -104,6 +110,8 @@ class DonationController extends Controller
         if ($donation->donor) {
             $this->lifecycleService->refresh($donation->donor);
         }
+
+        $this->inAppNotificationService->sendDonationThankYou($donation);
 
         return redirect()->back()->with('status', 'Donation validated successfully.');
     }

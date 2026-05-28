@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Donation Receipt #{{ str_pad($donation->id, 6, '0', STR_PAD_LEFT) }} — Antigravity Charity</title>
+    <title>Donation Receipt #{{ str_pad($donation->id, 6, '0', STR_PAD_LEFT) }} - Donation Module</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -162,7 +162,7 @@
     <div class="receipt-wrapper">
         <!-- Header -->
         <div class="receipt-header">
-            <div class="org-name">Antigravity Charity</div>
+            <div class="org-name">Donation Module</div>
             <div class="receipt-title">Official Donation Receipt</div>
             <div class="receipt-number">#{{ str_pad($donation->id, 6, '0', STR_PAD_LEFT) }}</div>
         </div>
@@ -263,7 +263,7 @@
 
         <!-- Footer -->
         <div class="receipt-footer">
-            <p>Thank you for your generous contribution to Antigravity Charity.</p>
+            <p>Thank you for your generous contribution.</p>
             <p style="margin-top: 4px;">This receipt was generated on {{ now()->format('d F Y, H:i') }}.</p>
         </div>
     </div>

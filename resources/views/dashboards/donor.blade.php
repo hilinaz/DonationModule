@@ -38,6 +38,53 @@
             </div>
         @endif
 
+        {{-- Notifications --}}
+        <div id="notifications" class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden scroll-mt-20">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Notifications</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ Auth::user()->unreadNotifications()->count() }} unread</p>
+                </div>
+                @if(Auth::user()->unreadNotifications()->exists())
+                    <form method="POST" action="{{ route('notifications.read') }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="text-xs font-semibold text-teal-600 hover:text-teal-700">
+                            Mark all read
+                        </button>
+                    </form>
+                @endif
+            </div>
+
+            @if($notifications->isEmpty())
+                <div class="px-6 py-8 text-center">
+                    <p class="text-sm text-gray-400">No notifications yet.</p>
+                </div>
+            @else
+                <div class="divide-y divide-gray-50">
+                    @foreach($notifications as $notification)
+                        @php
+                            $data = $notification->data;
+                            $unread = is_null($notification->read_at);
+                        @endphp
+                        <a href="{{ $data['action_url'] ?? route('donor.portal') }}"
+                           class="block px-6 py-4 hover:bg-gray-50 transition-colors {{ $unread ? 'bg-teal-50/40' : '' }}">
+                            <div class="flex items-start gap-3">
+                                <span class="mt-1 h-2.5 w-2.5 rounded-full {{ $unread ? 'bg-teal-500' : 'bg-gray-200' }}"></span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <p class="text-sm font-semibold text-gray-800">{{ $data['title'] ?? 'Notification' }}</p>
+                                        <span class="text-[10px] text-gray-400">{{ $notification->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">{{ $data['message'] ?? '' }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
         {{-- Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
@@ -371,4 +418,22 @@
         </div>
 
     </div>
+
+    {{-- Auto-scroll to notifications if arriving via bell or after donation --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const notifPanel = document.getElementById('notifications');
+            if (!notifPanel) return;
+
+            if (window.location.hash === '#notifications') {
+                setTimeout(function () {
+                    notifPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    notifPanel.classList.add('ring-2', 'ring-teal-400', 'ring-offset-2');
+                    setTimeout(function () {
+                        notifPanel.classList.remove('ring-2', 'ring-teal-400', 'ring-offset-2');
+                    }, 2000);
+                }, 200);
+            }
+        });
+    </script>
 </x-app-layout>

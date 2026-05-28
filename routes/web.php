@@ -9,6 +9,7 @@ use App\Http\Controllers\ReportingController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\DonorPortalController;
 use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,6 +58,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:Admin|Fundraising Manager|Finance|Marketing|Auditor')->group(function () {
         Route::resource('donors', DonorController::class);
     });
+
+    // Mark notifications read — available to all authenticated users
+    Route::patch('/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

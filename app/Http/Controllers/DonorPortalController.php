@@ -6,6 +6,7 @@ use App\Models\Campaign;
 use App\Models\Donation;
 use App\Models\Donor;
 use App\Services\DonorLifecycleService;
+use App\Services\InAppNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,10 +29,11 @@ class DonorPortalController extends Controller
         $donor = Donor::where('email', $user->email)->first();
 
         $activeCampaigns = Campaign::where('status', 'active')
+            ->withSum(['donations as raised' => fn ($query) => $query->where('payment_status', 'completed')], 'amount_base')
             ->orderBy('ends_at')
             ->get()
             ->map(function (Campaign $campaign) {
-                $raised            = (float) $campaign->donations()->where('payment_status', 'completed')->sum('amount_base');
+                $raised            = (float) ($campaign->raised ?? 0);
                 $campaign->raised  = $raised;
                 $campaign->pct     = $campaign->goal_amount > 0
                     ? min(100, round(($raised / $campaign->goal_amount) * 100, 1))
@@ -49,6 +51,10 @@ class DonorPortalController extends Controller
         $totalGiven = (float) $myDonations->where('payment_status', 'completed')->sum('amount_base');
 
         $currencies = array_keys(self::EXCHANGE_RATES);
+        $notifications = $user->notifications()
+            ->latest()
+            ->limit(10)
+            ->get();
 
         return view('dashboards.donor', compact(
             'donor',
@@ -56,6 +62,7 @@ class DonorPortalController extends Controller
             'myDonations',
             'totalGiven',
             'currencies',
+            'notifications',
         ));
     }
 
@@ -80,10 +87,11 @@ class DonorPortalController extends Controller
             return back()->with('error', 'This campaign is no longer accepting donations.');
         }
 
-        $currency     = $validated['currency'];
+        $isInKind     = $validated['donation_type'] === 'in_kind';
+        $currency     = $isInKind ? 'USD' : $validated['currency'];
         $rate         = self::EXCHANGE_RATES[$currency] ?? 1.0;
-        $amountOrig   = (float) $validated['amount'];
-        $amountBase   = round($amountOrig / $rate, 2); // convert to USD base
+        $amountOrig   = $isInKind ? 0 : (float) $validated['amount'];
+        $amountBase   = $isInKind ? 0 : round($amountOrig / $rate, 2); // convert to USD base
 
         $donation = Donation::create([
             'donor_id'              => $donor->id,
@@ -102,10 +110,11 @@ class DonorPortalController extends Controller
         ]);
 
         app(DonorLifecycleService::class)->refresh($donor);
+        app(InAppNotificationService::class)->sendDonationThankYou($donation);
 
-        // Redirect to receipt page
-        return redirect()->route('donor.receipt', $donation)
-            ->with('success', 'Thank you! Your donation has been recorded.');
+        // Redirect back to portal so the donor sees their thank-you notification
+        return redirect()->to(route('donor.portal') . '#notifications')
+            ->with('success', 'Thank you! Your donation has been recorded. Check your notifications below.');
     }
 
     public function receipt(Donation $donation): View
@@ -120,4 +129,5 @@ class DonorPortalController extends Controller
 
         return view('donations.receipt', compact('donation'));
     }
+
 }

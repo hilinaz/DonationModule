@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>{{ config('app.name', 'Antigravity Charity') }}</title>
+        <title>{{ config('app.name', 'Donation Module') }}</title>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,7 +33,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                 </div>
-                <h1 class="text-xl font-semibold text-white tracking-tight">Antigravity Charity</h1>
+                <h1 class="text-xl font-semibold text-white tracking-tight">Donation Module</h1>
                 <p class="text-sm text-gray-500 mt-1">Donation Management Platform</p>
             </div>
 
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Footer -->
-            <p class="text-center text-xs text-gray-600 mt-6">&copy; {{ date('Y') }} Antigravity Systems Inc.</p>
+            <p class="text-center text-xs text-gray-600 mt-6">&copy; {{ date('Y') }} Donation Management Platform</p>
         </div>
     </body>
 </html>
