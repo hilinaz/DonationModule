@@ -84,7 +84,6 @@ Route::middleware(['auth', 'verified', 'role:Admin|Fundraising Manager'])->group
 Route::middleware(['auth', 'verified', 'role:Admin|Finance|Auditor|Fundraising Manager'])->group(function () {
     Route::get('reports/donations', [ReportingController::class, 'donations'])->name('reports.donations');
     Route::get('reports/donors', [ReportingController::class, 'donors'])->name('reports.donors');
-    Route::get('reports/campaigns', [ReportingController::class, 'campaigns'])->name('reports.campaigns');
     Route::get('reports/export/donations', [ReportingController::class, 'exportDonationsCsv'])->name('reports.export.donations');
     Route::get('reports/export/donors', [ReportingController::class, 'exportDonorsCsv'])->name('reports.export.donors');
 });

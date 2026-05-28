@@ -98,19 +98,6 @@ class ReportingController extends Controller
         ));
     }
 
-    public function campaigns(Request $request)
-    {
-        $campaigns = Campaign::withSum('donations as raised_amount', 'amount_base')
-            ->withCount(['donations' => fn ($q) => $q->distinct('donor_id')])
-            ->orderBy('name')
-            ->get();
-
-        $totalGoal   = $campaigns->sum('goal_amount');
-        $totalRaised = $campaigns->sum('raised_amount');
-
-        return view('reports.campaigns', compact('campaigns', 'totalGoal', 'totalRaised'));
-    }
-
     public function exportDonationsCsv(Request $request): StreamedResponse
     {
         $query = Donation::with(['donor', 'campaign'])

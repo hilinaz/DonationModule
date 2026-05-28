@@ -7,3 +7,25 @@
         cursor: wait;
     }
 }
+
+@layer utilities {
+    .dashboard-readable .text-\[10px\] {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    .dashboard-readable .text-xs {
+        font-size: 0.95rem;
+        line-height: 1.35rem;
+    }
+
+    .dashboard-readable .text-sm {
+        font-size: 1.075rem;
+        line-height: 1.65rem;
+    }
+
+    .dashboard-readable .text-base {
+        font-size: 1.15rem;
+        line-height: 1.75rem;
+    }
+}
