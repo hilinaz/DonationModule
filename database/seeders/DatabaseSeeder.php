@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Donor;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -69,6 +70,22 @@ class DatabaseSeeder extends Seeder
             );
 
             $user->assignRole($userData['role']);
+
+            // Create a linked Donor profile for users with the Donor role
+            if ($userData['role'] === 'Donor') {
+                $nameParts = explode(' ', $userData['name'], 2);
+                Donor::firstOrCreate(
+                    ['email' => $userData['email']],
+                    [
+                        'first_name'      => $nameParts[0],
+                        'last_name'       => $nameParts[1] ?? '',
+                        'donor_type'      => 'individual',
+                        'category'        => 'regular',
+                        'lifecycle_stage' => 'new',
+                        'is_active'       => true,
+                    ]
+                );
+            }
         }
     }
 }

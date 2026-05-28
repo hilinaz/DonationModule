@@ -62,11 +62,11 @@ class DonorPortalController extends Controller
     public function donate(Request $request, Campaign $campaign): RedirectResponse
     {
         $validated = $request->validate([
-            'donation_type'         => ['required', 'in:one_time,recurring,pledge,in_kind'],
-            'currency'              => ['required', 'in:' . implode(',', array_keys(self::EXCHANGE_RATES))],
-            'amount'                => ['required', 'numeric', 'min:0.01', 'max:9999999'],
-            'gift_aid'              => ['nullable', 'boolean'],
-            'notes'                 => ['nullable', 'string', 'max:500'],
+            'donation_type' => ['required', 'in:one_time,recurring,pledge,in_kind'],
+            'currency'      => ['required_unless:donation_type,in_kind', 'in:' . implode(',', array_keys(self::EXCHANGE_RATES))],
+            'amount'        => ['required_unless:donation_type,in_kind', 'nullable', 'numeric', 'min:0.01', 'max:9999999'],
+            'gift_aid'      => ['nullable', 'boolean'],
+            'notes'         => ['nullable', 'string', 'max:500'],
         ]);
 
         $user  = auth()->user();

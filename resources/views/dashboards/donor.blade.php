@@ -268,11 +268,14 @@
                     </div>
 
                     {{-- Amount + Currency --}}
-                    <div x-show="donationType !== 'in_kind'">
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Amount</label>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                            Amount <span x-show="donationType === 'in_kind'" class="text-gray-400 font-normal normal-case">(not required for in-kind)</span>
+                        </label>
                         <div class="flex gap-2">
                             <select name="currency" x-model="currency"
-                                    class="w-28 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 bg-gray-50">
+                                    :disabled="donationType === 'in_kind'"
+                                    class="w-28 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 bg-gray-50 disabled:opacity-40">
                                 @foreach($currencies as $cur)
                                     <option value="{{ $cur }}">{{ $cur }}</option>
                                 @endforeach
@@ -280,13 +283,14 @@
                             <div class="relative flex-1">
                                 <input type="number" name="amount" x-model="amount"
                                        min="0.01" step="0.01" placeholder="0.00"
-                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition-all"
-                                       :required="donationType !== 'in_kind'" />
+                                       :disabled="donationType === 'in_kind'"
+                                       :required="donationType !== 'in_kind'"
+                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 transition-all disabled:opacity-40 disabled:bg-gray-50" />
                             </div>
                         </div>
 
-                        {{-- Quick presets --}}
-                        <div class="grid grid-cols-5 gap-1.5 mt-2">
+                        {{-- Quick presets (hidden for in-kind) --}}
+                        <div class="grid grid-cols-5 gap-1.5 mt-2" x-show="donationType !== 'in_kind'">
                             @foreach([10, 25, 50, 100, 250] as $p)
                             <button type="button" @click="amount = '{{ $p }}'"
                                     class="py-1.5 text-xs font-semibold border border-gray-200 rounded-lg text-gray-500
@@ -297,16 +301,16 @@
                             @endforeach
                         </div>
 
-                        {{-- Live conversion hint --}}
-                        <p x-show="currency !== 'USD' && amount > 0" class="text-xs text-gray-400 mt-1.5">
+                        <p x-show="currency !== 'USD' && amount > 0 && donationType !== 'in_kind'" class="text-xs text-gray-400 mt-1.5">
                             Approximate USD equivalent shown on receipt.
                         </p>
                     </div>
 
                     {{-- In-kind: amount field hidden, show note --}}
                     <div x-show="donationType === 'in_kind'">
-                        <input type="hidden" name="amount" value="0.01">
-                        <input type="hidden" name="currency" value="USD">
+                        <p class="text-xs text-purple-600 bg-purple-50 border border-purple-200 rounded-xl px-4 py-3">
+                            Describe your in-kind donation in the notes field below. No monetary amount is required.
+                        </p>
                     </div>
 
                     {{-- Gift Aid --}}
